@@ -1,45 +1,8 @@
+#include"Token.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
 
-#define ID_SIZ 31
-#define TEXT_SIZ 100
-
-// 文字種 と トークン種
-// 番号を指定していないのがトークン
-typedef enum{
-  EofTkn,
-  Digit=1, Letter=2, Others=3,
-  String, IntNum, Ident, NulKind, 
-  Dollar='$',
-  Lparen='(', Rparen=')', Lbrace='{', Rbrace='}', Lbracket='[', Rbracket=']',
-  Plus='+',   Minus='-',  Multi='*',  Divi='/',   Percent='%',  Assign='=',
-  Less='<',   Great='>',  And='&',    Or='|',     Not='!',
-  Dquot='"',  Squot='\'', Comma=',',
-  Semicolon=';', Colon=':', 
-  Dot='.',       Sharp='#',
-  Newline='\n',  Tab='\t',  Space=' ',
-}Kind;
-//入ってない文字、演算子 \ ~ ^ @ && || <= >= != ++ -- *= /= += -= %=
-
-// tokenデータ構造
-typedef struct{
-  Kind kind;
-  char text[TEXT_SIZ+1];
-  int intVal;
-} Token;
-
-//ファイルからトークンを一つ取り出す
-Token nextTkn(void);
-
-//文字種表を初期化する
-void init_chtyp(void);
-
-//ファイルから1文字読み出す
-int nextCh(void);
-
-//エラー文を吐いてプログラムを終了する
-void err_exit(char* err_str);
 
 
 Kind chtyp[256];

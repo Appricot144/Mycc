@@ -41,7 +41,7 @@ typedef struct{
 } Token;
 
 
-extern char* chtyp[256];
+extern char chtyp[256];
 extern FILE* fin;
 
 
@@ -56,8 +56,5 @@ int nextCh(void);
 
 //エラー文を吐いてプログラムを終了する
 void err_exit(char* err_str);
-
-extern char* chtyp[256];
-extern FILE* fin;
 
 #endif
