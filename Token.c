@@ -1,12 +1,10 @@
 #include"Token.h"
-#include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
 
 
-
 Kind chtyp[256];
-FILE* fin;
+FILE *fin;
 
 
 void init_chtyp(void){
@@ -38,16 +36,16 @@ void init_chtyp(void){
 Token nextTkn(void){
   Token tkn = {NulKind, " ", 0};
   char *p = tkn.text, *p_31 = p+ID_SIZ, *p_100 = p+TEXT_SIZ;
-  int num = 0, d = 0, cc = 0, err = 0;
+  int num = 0, cc = 0, err = 0;
   
   static int ch = ' ';
   
   while( isspace(ch) ){ ch = nextCh(); }
-  if(ch == EOF){ tkn.kind = EofTkn; }
+  if(ch == EOF){ tkn.kind = EofTkn; return tkn;}
 
   switch(chtyp[ch]){
 
-  case Letter: 
+  case Letter:
 	for( ; chtyp[ch]==Letter || chtyp[ch]==Digit; ch = nextCh()){
 	  if(p < p_31)
 		*p++ = ch;
@@ -58,8 +56,8 @@ Token nextTkn(void){
 	break;
 
   case Digit:
-	for(; chtyp[ch]==Digit; ch = nextCh(), d++ ){
-	  num += (10*d) + (ch-'0');
+	for(; chtyp[ch]==Digit; ch = nextCh()){
+	  num = (10*num) + (ch-'0');
 	  *p++ = ch;
 	}
 	tkn.intVal = num;
@@ -67,7 +65,7 @@ Token nextTkn(void){
 	break;
 
   case Squot:
-	for(ch=nextCh(); ch!=EOF && ch!='\n' && ch!='\''; ch=nextCh()){
+	for(ch = nextCh(); ch!=EOF && ch!='\n' && ch!='\''; ch=nextCh()){
 	  *p++ = ch;
 	  tkn.intVal = ch; 
 	  cc++;
@@ -79,26 +77,28 @@ Token nextTkn(void){
 	}
 	if(cc >= 2){ err_exit("too many charactor(less than 2) (\') "); }
 	if(ch==EOF || ch=='\n'){ err_exit("can\'t find Single Quotation(\')"); }
+	ch = nextCh(); /*岉元化中月'毛樁化月*/
 
 	tkn.kind = IntNum;
 	break;
 
   case Dquot:
-	for(ch=nextCh(); ch!=EOF && ch!='\n' && ch!='"'; ch=nextCh()){
-	  if(p >= p_100){
-		err = 1;
-		break;
-	  }else
-		*p++ = ch;
+	for(ch = nextCh(); ch != EOF && ch != '\n' && ch!='"'; ch=nextCh()){
+	  if(p >= p_100) err = 1;
+	  else *p++ = ch;
+	  printf("%c\n",ch);
 	}
 	*p = '\0';
-	if(err != 0){ err_exit("too many charactor(less than 2) (\") "); }
-	if(ch != '"'){ err_exit("can't find Double Quotation(\")"); }
+	if(err != 0){ err_exit("too many charactor(less than 100) (\") "); }
+	if(ch != '"'){ printf("can't find Double Quotation(\") ch(%c)\n", ch); exit(1);}
+
+	ch = nextCh(); /*岉元化中月"毛樁化月*/
 	tkn.kind = String;
 	break;
 
   default:/*梢遙閡*/
-	*p = ch; *p='\0';
+	*p++ = ch; *p='\0';
+	ch = nextCh();
 	tkn.kind = ch;
   }
 
@@ -131,8 +131,19 @@ void err_exit(char* err_str){
   exit(1);
 }
 
-int main (void){
+int main (int argc, char *argv[]){
+  if(argc == 1) exit(1);
+  if((fin = fopen(argv[1], "r")) == NULL) exit(1);
+  Token token;
+  int i;
+
+  printf("text       kind intVal\n");
   init_chtyp();
+  for(i=0; i<100; i++){
+	token = nextTkn();
+	if(token.kind == EofTkn) break;
+	printf("%-10s %4d %6d\n", token.text, token.kind, token.intVal);
+  }
   return 0;
 }
 

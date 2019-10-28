@@ -1,6 +1,7 @@
 #ifndef ___token_gen_h
 #define ___token_gen_h
 
+#include<stdio.h>
 
 /*注意点*/
 // 大文字と小文字はLetterで統一
@@ -41,8 +42,8 @@ typedef struct{
 } Token;
 
 
-extern char chtyp[256];
-extern FILE* fin;
+extern Kind chtyp[256];
+extern FILE *fin;
 
 
 //ファイルからトークンを一つ取り出す
