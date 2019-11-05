@@ -1,4 +1,4 @@
 *.out
-tect.c
+test*
 
 /bin/

@@ -12,27 +12,29 @@
 // String, NulKind, EofTkn, Identのトークンを追加しました。
 // String は 文字列トークン種
 // EofTkn は Eof用のトークン種
-// NulKind は 便利に使えるトークンです。あり当てるトークン種がないときに使う。
+// NulKind は 便利に使えるトークンです。割り当てるトークン種がないときに使う。
 
 #define ID_SIZ 31
 #define TEXT_SIZ 100
 
-// 文字種 と トークン種
-// 番号を指定していないのがトークン
+// トークン種 等
 typedef enum{
   EofTkn,
-  Digit=1, Letter=2, Others=3,
-  String, IntNum, Ident, NulKind, 
+  Digit=1,       Letter=2,    Others=3,
+  String,        IntNum,      Ident,       NulKind,     EndList,
   Dollar='$',
-  Lparen='(', Rparen=')', Lbrace='{', Rbrace='}', Lbracket='[', Rbracket=']',
-  Plus='+',   Minus='-',  Multi='*',  Divi='/',   Percent='%',  Assign='=',
-  Less='<',   Great='>',  And='&',    Or='|',     Not='!',
-  Dquot='"',  Squot='\'', Comma=',',
+  Lparen='(',    Rparen=')',  Lbrace='{',  Rbrace='}', Lbracket='[', Rbracket=']',
+  Plus='+',      Minus='-',   Multi='*',   Divi='/',   Percent='%',  Assign='=',
+  PlusEq=130,    MinusEq=131, MultiEq=132, DiviEq=133, PerEq=134,
+  Less='<',      Great='>',   And='&',     Or='|',     Not='!',
+  LessEq=135,    GreatEq=136, And2=137,    Or2=138,    NotEq=139, Equal=140,
+  Dquot='"',     Squot='\'',  Comma=',',
   Semicolon=';', Colon=':', 
   Dot='.',       Sharp='#',
-  Newline='\n',  Tab='\t',  Space=' ',
+  Newline='\n',  Tab='\t',    Space=' ',
+  If=150,        Else=151,    While=152,  For=153,
 }Kind;
-//入ってない文字、演算子 \ ~ ^ @ && || <= >= != ++ -- *= /= += -= %=
+// 入ってない文字、演算子 \ ~ ^ @ ++ --
 
 // tokenデータ構造
 typedef struct{
@@ -41,7 +43,22 @@ typedef struct{
   int intVal;
 } Token;
 
+// 文字列とトークンの対応
+struct{
+  char *keywd_text;
+  Kind kkind;
+} KeywdTbl[] = {
+  {"+=",	PlusEq }, {"-=",   MinusEq},
+  {"*=",	MultiEq}, {"/=",   DiviEq },
+  {"<=",    LessEq }, {">=",   GreatEq}, 
+  {"&&",    And2   }, {"||",   Or2    },
+  {"!=",    NotEq  }, {"==",   Equal  },
+  {"if",    If     }, {"else", Else   },
+  {"while", While  }, {"for",  For    },
+  {"", 		EndList}
+};
 
+//グローバル変数
 extern Kind chtyp[256];
 extern FILE *fin;
 
@@ -55,7 +72,11 @@ void init_chtyp(void);
 //ファイルから1文字読み出す
 int nextCh(void);
 
-//エラー文を吐いてプログラムを終了する
+//エラー文を出力してプログラムを終了する
 void err_exit(char* err_str);
+
+int is_op2(char c1, char c2);
+int is_reserved_wd(char *s);
+Token set_kind(Token t);
 
 #endif

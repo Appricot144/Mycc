@@ -1,4 +1,5 @@
 #include"Token.h"
+#include<string.h>
 #include<stdlib.h>
 #include<ctype.h>
 
@@ -10,6 +11,7 @@ FILE *fin;
 void init_chtyp(void){
   int i = 0;
 
+  for(i=0; i<256; i++){chtyp[i] = Others;}
   for(i='a'; i<'z'; i++){chtyp[i] = Letter; }
   for(i='A'; i<'Z'; i++){chtyp[i] = Letter; }
   for(i='0'; i<'9'; i++){chtyp[i] = Digit;  }
@@ -51,8 +53,6 @@ Token nextTkn(void){
 		*p++ = ch;
 	}
 	*p = '\0';
-	//"for"や"if"の識別子をトークン種に登録していないので全てIdentトークンにする。
-	tkn.kind = Ident;
 	break;
 
   case Digit:
@@ -65,14 +65,15 @@ Token nextTkn(void){
 	break;
 
   case Squot:
-	for(ch = nextCh(); ch!=EOF && ch!='\n' && ch!='\''; ch=nextCh()){
+	for(ch = nextCh(); ch!=EOF && ch!='\n' && ch!='\''; ch=nextCh() ){
 	  *p++ = ch;
 	  tkn.intVal = ch; 
 	  cc++;
 	  
 	  if(ch == '\\') { /*エスケープ文字の処理*/
 		ch = nextCh();
-		if(ch=='n' && ch=='t'){ *p++ = ch; } else cc++;
+		if(ch=='n' || ch=='t') *p++ = ch;
+		else cc++;
 	  }
 	}
 	if(cc >= 2){ err_exit("too many charactor(less than 2) (\') "); }
@@ -86,28 +87,57 @@ Token nextTkn(void){
 	for(ch = nextCh(); ch != EOF && ch != '\n' && ch!='"'; ch=nextCh()){
 	  if(p >= p_100) err = 1;
 	  else *p++ = ch;
-	  printf("%c\n",ch);
 	}
 	*p = '\0';
 	if(err != 0){ err_exit("too many charactor(less than 100) (\") "); }
-	if(ch != '"'){ printf("can't find Double Quotation(\") ch(%c)\n", ch); exit(1);}
+	if(ch != '"'){ err_exit("can't find Double Quotation(\")\n"); }
 
 	ch = nextCh(); /*閉じている"を捨てる*/
 	tkn.kind = String;
 	break;
 
-  default:/*演算子*/
-	*p++ = ch; *p='\0';
+  default:/*演算子, その他のトークン設定*/
+	*p++ = ch;
 	ch = nextCh();
-	tkn.kind = ch;
-  }
+	if(is_op2(*(p-1), ch)) { /*op2*/
+	  *p++ = ch; 
+	  ch = nextCh();
+	  *p = '\0';
+	}else{ 					 /*op1*/
+	  *p = '\0'; 
+	}
 
-  if(tkn.kind == Others) { 
+  }
+  if(tkn.kind == NulKind) { tkn = set_kind(tkn);}
+  if(tkn.kind == Others ) { 
 	printf("iligal token (%s)\n", tkn.text);
 	exit(1);
   }
 
   return tkn;
+}
+
+int is_op2(char c1,char c2){
+  char s[] = "--";
+  s[0] = c1, s[1] = c2;
+  return strstr(" +=,-=,*=,/=,<=,>=,==,!=,&&,||, ", s) != NULL;
+}
+
+Token set_kind(Token t){
+  char *s = t.text;
+  int i;
+  for(i=0; KeywdTbl[i].kkind != EndList; i++){ //op2 & reserved_words
+	if(strcmp(KeywdTbl[i].keywd_text, s) == 0){
+	  t.kind = KeywdTbl[i].kkind;
+	  return t;
+	}
+  }
+  if(chtyp[*s]==Letter){ //Ident
+	t.kind = Ident;
+  }else { 				 //op1
+	t.kind = chtyp[*s];
+  }
+  return t;
 }
 
 //nextCh
@@ -139,11 +169,12 @@ int main (int argc, char *argv[]){
 
   printf("text       kind intVal\n");
   init_chtyp();
-  for(i=0; i<100; i++){
+  for(i=0; i<256; i++){
 	token = nextTkn();
 	if(token.kind == EofTkn) break;
 	printf("%-10s %4d %6d\n", token.text, token.kind, token.intVal);
   }
   return 0;
 }
+
 
