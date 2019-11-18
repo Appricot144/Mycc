@@ -1,4 +1,8 @@
-*.out
-test*
+*.o
+*.dSYM
 
-/bin/
+test*
+test*.*
+
+a.out
+.*

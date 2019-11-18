@@ -43,21 +43,6 @@ typedef struct{
   int intVal;
 } Token;
 
-// 文字列とトークンの対応
-struct{
-  char *keywd_text;
-  Kind kkind;
-} KeywdTbl[] = {
-  {"+=",	PlusEq }, {"-=",   MinusEq},
-  {"*=",	MultiEq}, {"/=",   DiviEq },
-  {"<=",    LessEq }, {">=",   GreatEq}, 
-  {"&&",    And2   }, {"||",   Or2    },
-  {"!=",    NotEq  }, {"==",   Equal  },
-  {"if",    If     }, {"else", Else   },
-  {"while", While  }, {"for",  For    },
-  {"", 		EndList}
-};
-
 //グローバル変数
 extern Kind chtyp[256];
 extern FILE *fin;
