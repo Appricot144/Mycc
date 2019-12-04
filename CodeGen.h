@@ -14,8 +14,11 @@ void gen_mov(int imm);
 //puch命令
 void gen_push(int imm);
 
-//compile
+//構文木の走査
 void compile(void);
+
+//assembly prologue
+void begin_compile(void);
 //pop,ret fclose()
 void end_compile(void);
 

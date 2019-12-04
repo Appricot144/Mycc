@@ -1,5 +1,5 @@
 #include"Token.h"
-#include"parser.h"
+#include"Parser.h"
 #include"CodeGen.h"
 #include<stdlib.h>
 
