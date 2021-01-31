@@ -7,14 +7,14 @@
 Kind chtyp[256];
 FILE *fin;
 
-// Ê¸»úÎó¤È¥È¡¼¥¯¥ó¤ÎÂĞ±ş
+// Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½È¥È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 struct{
   char *keywd_text;
   Kind kkind;
 } KeywdTbl[] = {
   {"+=",	PlusEq }, {"-=",   MinusEq},
   {"*=",	MultiEq}, {"/=",   DiviEq },
-  {"<=",    LessEq }, {">=",   GreatEq}, 
+  {"<=",    LessEq }, {">=",   GreatEq},
   {"&&",    And2   }, {"||",   Or2    },
   {"!=",    NotEq  }, {"==",   Equal  },
   {"if",    If     }, {"else", Else   },
@@ -31,39 +31,39 @@ void init_chtyp(void){
 	for(i='0'; i<'9'; i++){chtyp[i] = Digit;  }
 	chtyp['_'] = Letter;
 	chtyp['$'] = Dollar;
-	chtyp['('] = Lparen;   chtyp[')'] = Rparen; 
-	chtyp['{'] = Lbrace;   chtyp['}'] = Rbrace; 
+	chtyp['('] = Lparen;   chtyp[')'] = Rparen;
+	chtyp['{'] = Lbrace;   chtyp['}'] = Rbrace;
 	chtyp['['] = Lbracket; chtyp[']'] = Rbracket;
-	chtyp['+'] = Plus;     chtyp['-'] = Minus; 
-	chtyp['*'] = Multi;    chtyp['/'] = Divi; 
-	chtyp['%'] = Percent;  chtyp['='] = Assign; 
-	chtyp['<'] = Less;     chtyp['>'] = Great; 
+	chtyp['+'] = Plus;     chtyp['-'] = Minus;
+	chtyp['*'] = Multi;    chtyp['/'] = Divi;
+	chtyp['%'] = Percent;  chtyp['='] = Assign;
+	chtyp['<'] = Less;     chtyp['>'] = Great;
 	chtyp['&'] = And;      chtyp['|'] = Or;         chtyp['!'] = Not;
-	chtyp['"'] = Dquot;    chtyp['\''] = Squot; 
+	chtyp['"'] = Dquot;    chtyp['\''] = Squot;
 	chtyp[','] = Comma;    chtyp[';'] = Semicolon;  chtyp[':'] = Colon;
 	chtyp['.'] = Dot;      chtyp['#'] = Sharp;
-	chtyp['\n'] = Newline; chtyp['\t'] = Tab; 
+	chtyp['\n'] = Newline; chtyp['\t'] = Tab;
 	chtyp[' '] = Space;
 }
 
 //nextTkn
-// µ¡Ç½¡¡ : ¥Õ¥¡¥¤¥ë¤«¤é¥È¡¼¥¯¥ó¤ò°ì¤Ä¼è¤ê½Ğ¤¹¡£
-// Ìá¤êÃÍ : Token
+// æ©Ÿèƒ½ : ç©ºç™½ã‚’ç„¡è¦–ã—ã¦æ¬¡ã®ãƒˆãƒ¼ã‚¯ãƒ³ã‚’èª­ã¿å‡ºã™
+// è¿”ã‚Šå€¤ : Token
 Token nextTkn(void){
 	Token tkn = {NulKind, " ", 0};
 	char *p = tkn.text, *p_31 = p+ID_SIZ, *p_100 = p+TEXT_SIZ;
 	int num = 0, cc = 0, err = 0;
-	
+
 	static int ch = ' ';
-  
+
 	while( isspace(ch) ){ ch = nextCh(); }
 	if(ch == EOF){ tkn.kind = EofTkn; return tkn;}
 
 	switch(chtyp[ch]){
-		
+
 	case Letter:
 		for( ; chtyp[ch]==Letter || chtyp[ch]==Digit; ch = nextCh()){
-			if(p < p_31)
+			if(p < p_31) //æ€ªã—ã„ã€€å¾Œã§ç›´ã™
 				*p++ = ch;
 		}
 		*p = '\0';
@@ -81,10 +81,10 @@ Token nextTkn(void){
 	case Squot:
 		for(ch = nextCh(); ch!=EOF && ch!='\n' && ch!='\''; ch=nextCh() ){
 			*p++ = ch;
-			tkn.intVal = ch; 
+			tkn.intVal = ch;
 			cc++;
-			
-			if(ch == '\\') { /*¥¨¥¹¥±¡¼¥×Ê¸»ú¤Î½èÍı*/
+
+			if(ch == '\\') { /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¸ï¿½ï¿½ï¿½Î½ï¿½ï¿½ï¿½*/
 				ch = nextCh();
 				if(ch=='n' || ch=='t') *p++ = ch;
 				else cc++;
@@ -92,8 +92,8 @@ Token nextTkn(void){
 		}
 		if(cc >= 2){ err_exit("too many charactor(less than 2) (\') "); }
 		if(ch==EOF || ch=='\n'){ err_exit("can\'t find Single Quotation(\')"); }
-		ch = nextCh(); /*ÊÄ¤¸¤Æ¤¤¤ë'¤ò¼Î¤Æ¤ë*/
-	  
+		ch = nextCh(); /*ï¿½Ä¤ï¿½ï¿½Æ¤ï¿½ï¿½ï¿½'ï¿½ï¿½ï¿½Î¤Æ¤ï¿½*/
+
 		tkn.kind = IntNum;
 		break;
 
@@ -106,24 +106,24 @@ Token nextTkn(void){
 		if(err != 0){ err_exit("too many charactor(less than 100) (\") "); }
 		if(ch != '"'){ err_exit("can't find Double Quotation(\")\n"); }
 
-		ch = nextCh(); /*ÊÄ¤¸¤Æ¤¤¤ë"¤ò¼Î¤Æ¤ë*/
+		ch = nextCh(); /*ï¿½Ä¤ï¿½ï¿½Æ¤ï¿½ï¿½ï¿½"ï¿½ï¿½ï¿½Î¤Æ¤ï¿½*/
 		tkn.kind = String;
 		break;
 
-	default:/*±é»»»Ò, ¤½¤ÎÂ¾¤Î¥È¡¼¥¯¥óÀßÄê*/
+	default:/*ï¿½é»»ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Â¾ï¿½Î¥È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
 		*p++ = ch;
 		ch = nextCh();
 		if(is_op2(*(p-1), ch)) { /*op2*/
-			*p++ = ch; 
+			*p++ = ch;
 			ch = nextCh();
 			*p = '\0';
 		}else{ 					 /*op1*/
-			*p = '\0'; 
+			*p = '\0';
 		}
 
 	}
 	if(tkn.kind == NulKind) { tkn = set_kind(tkn);}
-	if(tkn.kind == Others ) { 
+	if(tkn.kind == Others ) {
 		printf("iligal token (%s)\n", tkn.text);
 		exit(1);
 	}
@@ -157,9 +157,9 @@ Token set_kind(Token t){
 }
 
 //nextCh
-// µ¡Ç½¡¡ : ¥Õ¥¡¥¤¥ë¤«¤é1Ê¸»úÆÉ¤ß½Ğ¤¹
-// Ìá¤êÃÍ : ¼è¤ê½Ğ¤·¤¿Ê¸»ú¤ÎÃÍ(ascii¥³¡¼¥ÉÃÍ)
-// ¡¡¡¡ ¡¡: EOF¤Î¤È¤­ 0 ¤òÊÖ¤¹
+// æ©Ÿèƒ½ : ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰æ¬¡ã®ï¼‘æ–‡å­—ã‚’èª­ã¿å‡ºã™
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¤ï¿½ï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(asciiï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½: EOFï¿½Î¤È¤ï¿½ 0 ï¿½ï¿½ï¿½Ö¤ï¿½
 int nextCh(void){
 	static int ch;
 	ch = fgetc(fin);
@@ -171,7 +171,7 @@ int nextCh(void){
 }
 
 //err_exit
-// µ¡Ç½  : ¥¨¥é¡¼Ê¸¤ò½ĞÎÏ¤·¤Æ¥×¥í¥°¥é¥à¤ò½ªÎ»¤¹¤ë¡£
+// æ©Ÿèƒ½  : ã‚¨ãƒ©ãƒ¼æ–‡ã‚’å‡ºåŠ›ã—ã¦ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’çµ‚äº†ã™ã‚‹
 void err_exit(char* err_str){
 	puts(err_str);
 	exit(1);

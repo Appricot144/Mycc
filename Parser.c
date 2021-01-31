@@ -11,46 +11,71 @@ int errF;
 
 FILE *fout;
 
-void expression(void) {
+Node* statement(void){
 	Kind op;
 
-	term();
+	Node* node = expression();
+	while(token.kind == '='){
+		op = token.kind;
+		token = nextTkn();
+		node = new_node(op, node, expression());
+	}
+	return node;
+}
+
+Node* expression(void) {
+	Kind op;
+
+	Node* node = term();
 	while (token.kind == Plus || token.kind == Minus) {
 		op = token.kind;
 		token = nextTkn();
-		term();
-		gen_binary(op);
-		//�����Z���Z
+		//////ここの条件設定が違う　nextTknしてからtoken.kindで条件分岐してしまっている
+		//if (token.kind == Plus) {
+			node = new_node(op,node,term());
+			//}else if (token.kind == Minus) {
+			//node = new_node(op,node,term());
+			//}
 	}
+	return node;
 }
-void term(void) {
+
+Node* term(void) {
 	Kind op;
 
-	factor();
+	Node* node = factor();
 	while (token.kind == Multi || token.kind == Divi) {
 		op = token.kind;
 		token = nextTkn();
-		factor();
-		gen_binary(op);
-		//�揜�Z���Z
+		//if (token.kind == Multi) {
+			node = new_node(op, node, factor());
+			//}else if (token.kind == Divi) {
+			//node = new_node(op, node, factor());
+			//}
 	}
+	return node;
 }
 
-void factor(void) {
+Node* factor(void) {
+	Node* node;
 	switch (token.kind) {
-	case IntNum:
-		gen_mov(token.intVal);
-		gen_push(token.intVal);
-		break;
+	case IntNum: //整数
+		node = new_node_num(token.kind,token.intVal);
+		token = nextTkn();
+		return node;
 	case Lparen:
 		token = nextTkn();
-		expression();
+		node = expression();
 		chkTkn(Rparen);
-		break;
+		token = nextTkn();
+		return node;
+	case Ident: //変数
+		node = new_node_num(token.kind, token.intVal);
+		token = nextTkn();
+		return node;
 	default:
-		if (token.kind == EofTkn) errF = 1;
+		return NULL;
 	}
-	token = nextTkn();
 }
 
 void chkTkn(Kind op) {
@@ -59,24 +84,104 @@ void chkTkn(Kind op) {
 	}
 }
 
+Node* new_node(Kind kind, Node* lhs, Node* rhs) {
+	Node* node = (Node*)calloc(1, sizeof(Node));
+	node->kind = kind;
+	node->lhs = lhs;
+	node->rhs = rhs;
+	return node;
+}
+
+Node* new_node_num(Kind kind, int val) {
+	Node* node = (Node*)calloc(1, sizeof(Node));
+	node->kind = kind;
+	node->val = val;
+	return node;
+}
+
+void printNode(Node* node) {
+	printf("now.kind  : %d\n", node->kind);
+	printf("now.left  : %p\n", node->lhs);
+	printf("now.right : %p\n", node->rhs);
+	if (node->kind == IntNum) {
+		printf("now.val : %d\n", node->val);
+		puts("IntNum");
+	}
+
+	switch (node->kind) {
+	case Plus:
+		printf("Plus\n");
+		break;
+	case Minus:
+		printf("Minus\n");
+		break;
+	case Multi:
+		printf("Multi\n");
+		break;
+	case Divi:
+		printf("Divi\n");
+		break;
+	case '=':
+		printf("equal\n");
+		break;
+	case Ident://変数
+		printf("variable\n");
+		break;
+	case Lparen:
+		printf("Lparen\n");
+		break;
+	case Rparen:
+		printf("Rparen\n");
+		break;
+	case NulKind:
+		break;
+	default:
+		break;
+	}
+	
+	if(node->lhs == 0) return;
+	puts("-------------into left--------------");
+	printNode(node->lhs);
+	
+	if(node->rhs == 0) return;
+	puts("-------------into right-------------");
+	printNode(node->rhs);
+	puts("------------------------------------");
+}
+
+
 int main (int argc, char *argv[]){
 	if(argc == 1) exit(1);
 	if((fin  = fopen(argv[1], "r")) == NULL) exit(1);
 	if((fout = fopen(argv[2], "w")) == NULL) exit(1);
 	
-	init_chtyp();
-	printf("text       kind intval\n");
-	
-	compile();
+	Node* node;
 
-	for(token = nextTkn(); token.kind != EofTkn;){
-		expression();
+	init_chtyp();
+	// nextTkn()動作テスト用 
+	printf("text       kind intval\n");
+
+	// .intel_syntax noprefix
+	// _main
+	pre_compile();
+	// [要修正] : 1ループ毎にnextTkn()で';'を読み飛ばしている
+	for(token = nextTkn(); token.kind != EofTkn; token = nextTkn()){
+		node = statement();
 		if(errF) puts("---err---");
+		// statement()動作テスト用
+		printNode(node);
+		
+		printf("==========now.node.kind : %d=============\n", node->kind);
+		compile(node);
 	}
+
+	fprintf(fout,
+			"mov rsp, rbp\n\t"
+			"pop rbp\n\t"
+			"ret\n");
 	
 	printf("end_compile\n");
-	end_compile();
+	fclose(fout);
 
 	return 0;
 }
-

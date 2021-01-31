@@ -1,6 +1,7 @@
 #include"Token.h"
 #include"CodeGen.h"
-#include<stdio.h>
+#include<stdlib.h>
+
 
 FILE *fout;
 
@@ -45,8 +46,7 @@ void gen_binary(int token_kind){
 // correct
 //  a = 1 + b * c;
 
-void compile(Node *node){
-		
+void pre_compile(){
 	fprintf(fout,
 			".intel_syntax noprefix\n"
 			".text\n"
@@ -111,11 +111,15 @@ void Gen_expression(Node *node){
 		if(IdCount > 3) {puts("Ident count is over"); exit(1);}
 		
 		fprintf(fout, "mov eax, dword ptr [rbp - %d]\n\t", IdCount*4 );
-		fprintf(fout, "push eax\n\t");
+		fprintf(fout, "push rax\n\t");
 		break;
 		
 	default:
-		puts("syntax error (%d)", node->kind);
+		printf("syntax error (%d)\n", node->kind);
 		exit(1);
 	}
+}
+
+Kind lookLeftNode(Node* left){
+	return left->kind;
 }

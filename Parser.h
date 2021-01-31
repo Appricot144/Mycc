@@ -6,12 +6,27 @@
 extern Token token;
 extern int errF;
 
-void expression(void);
+typedef struct Node{
+	Kind kind;
+	struct Node* lhs;
+	struct Node* rhs;
+	int val;
+}Node;
 
-void term(void);
+Node* statement(void);
 
-void factor(void);
+Node* expression(void);
+
+Node* term(void);
+
+Node* factor(void);
 
 void chkTkn(Kind op);
+
+Node* new_node(Kind kind,Node* lhs,Node* rhs);
+
+Node* new_node_num(Kind kind,int val);
+
+void printNode(Node *node);
 
 #endif
