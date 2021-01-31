@@ -54,57 +54,55 @@ void compile(Node *node){
 			"_main:\n\t"
 			"push\trbp\n\t"
 			"mov rbp, rsp\n\t"
-			"sub rbp, 12\n\t"
 			"xor eax, eax\n\t");
+	// "sub rbp, 12\n\t"
 	
-	fprintf(fout, "mov dword ptr [rbp - 4], 0\n\t");
-	fprintf(fout, "mov dword ptr [rbp - 8], 0\n\t");
-	fprintf(fout, "mov dword ptr [rbp - 12], 0\n\t");
+	//fprintf(fout, "mov dword ptr [rbp - 4], 0\n\t");
+	//fprintf(fout, "mov dword ptr [rbp - 8], 0\n\t");
+	//fprintf(fout, "mov dword ptr [rbp - 12], 0\n\t");
+}
+
+void compile(Node *node){
+	Kind left;
 	
 	switch(node->kind){
 	case '=':
-		int left;
-		
-		left = lookLeftNode(node->left);
+		left = lookLeftNode(node->lhs);
 		if(left != Ident) printf("left subtree is not Ident(%d)\n", left);
 		
 		fprintf(fout, "mov dword ptr [rbp - 4], 0\n\t");		/* 左辺値 */
-		Gen_expression(node->right);
+		Gen_expression(node->rhs);
 		fprintf(fout, "mov dword ptr [rbp - 4], eax\n\t");		/* 右辺値 */
+		break;
 		
 	case '+': case '-': case '*': case '/':
 		Gen_expression(node);
-
+		break;
+		
 	case IntNum:
-		fprintf(fout, "mov eax, %d\n\t", node->intVal);
+		fprintf(fout, "mov eax, %d\n\t", node->val);
+		break;
 		
 	default:
-		printf("Tree is not expression : (%d)\n", node->kind);
+		printf("Tree is not expression : (%d:%d)\n", node->kind, node->val);
 		return;
 	}
-
-	fprintf(fout,
-			"mov rsp, rbp\n\t"
-			"pop rbp\n\t"
-			"ret\n");
-
-	fclose(fout);
 	
 }
 
 void Gen_expression(Node *node){
-	static int IdCount = 1;
+	static int IdCount = 0;
 	
 	switch(node->kind){
 	case '+': case '-': case '*': case '/':
-		Gen_expression(node->left);
-		Gen_expression(node->right);
+		Gen_expression(node->lhs);
+		Gen_expression(node->rhs);
 		gen_binary(node->kind);
 		break;
 		
 	case IntNum:
-		fprintf(fout, "mov eax, %d\n\t", node->intVal);
-		fprintf(fout, "push eax\n\t");
+		fprintf(fout, "mov eax, %d\n\t", node->val);
+		fprintf(fout, "push rax\n\t");
 		break;
 		
 	case Ident:
